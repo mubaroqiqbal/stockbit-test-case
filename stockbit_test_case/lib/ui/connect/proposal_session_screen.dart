@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:stockbit_test_case/bloc/connect/cubit/approval_cubit.dart';
 import 'package:stockbit_test_case/model/session_request_data.dart';
+import 'package:stockbit_test_case/ui/home.dart';
 
 class ProposalSessionScreen extends StatefulWidget {
   final SessionRequestData proposalRequestData;
@@ -57,15 +58,6 @@ class _ProposalSessionScreenState extends State<ProposalSessionScreen> {
           break;
         case 'onSessionSettleResponse':
           // handler!.onCallRequestEthSign(params['id'], params['rawJson']);
-
-          Get.snackbar(
-            "Success",
-            "Approving session success",
-            colorText: Colors.white,
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.lightGreen,
-            margin: const EdgeInsets.all(16),
-          );
           break;
         case 'onSessionUpdateResponse':
           // handler!.onCallRequestEthSignTypedData(params['id'], params['rawJson']);
@@ -86,116 +78,138 @@ class _ProposalSessionScreenState extends State<ProposalSessionScreen> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back),
-          ),
-          title: const Text(
-            "Session Proposal",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-        ),
-        body: BlocBuilder(
-          bloc: approvalCubit,
-          builder: (BuildContext context, ApprovalState state) {
-            if (state is ApprovalLoading) {
-              return SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 100),
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
+      child: WillPopScope(
+        onWillPop: () async {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const MyHomePage()),
+            (route) => false,
+          );
 
-            if (state is ApproveSuccess || state is RejectSuccess) {
-              Future.delayed(const Duration(seconds: 1), () => Navigator.pop(context));
-            }
-
-            return SafeArea(
-              child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: SingleChildScrollView(
+          return false;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () => Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const MyHomePage()),
+                (route) => false,
+              ),
+              icon: const Icon(Icons.arrow_back),
+            ),
+            title: const Text(
+              "Session Proposal",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          body: BlocBuilder(
+            bloc: approvalCubit,
+            builder: (BuildContext context, ApprovalState state) {
+              if (state is ApprovalLoading) {
+                return SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        ListTile(
-                          leading: Image.network(widget.proposalRequestData.icons.first),
-                          title: Text(widget.proposalRequestData.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text(widget.proposalRequestData.url),
-                        ),
-                        const Divider(color: Colors.black, thickness: 0.5),
-                        const SizedBox(height: 16),
                         Container(
-                          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
-                          child: ListView.builder(
-                            itemCount: widget.proposalRequestData.requiredNamespaces.keys.length,
-                            itemBuilder: (context, index) {
-                              Map<String, dynamic> map = widget.proposalRequestData.requiredNamespaces.values.toList()[index] as Map<String, dynamic>;
-
-                              String methods = json.encode(map["methods"]).replaceAll("[", "").replaceAll("]", "").replaceAll('"', "").replaceAll(",", ", ");
-                              String events = json.encode(map["events"]).replaceAll("[", "").replaceAll("]", "").replaceAll('"', "").replaceAll(",", ", ");
-
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Review " + widget.proposalRequestData.requiredNamespaces.keys.toList()[index] + " permissions",
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Card(
-                                    child: Container(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const Text("Methods", style: TextStyle(fontWeight: FontWeight.bold)),
-                                          const SizedBox(height: 8),
-                                          Text(methods),
-                                          const SizedBox(height: 16),
-                                          const Text("Events", style: TextStyle(fontWeight: FontWeight.bold)),
-                                          const SizedBox(height: 8),
-                                          Text(events),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              );
-                            },
+                          margin: const EdgeInsets.only(top: 100),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
                           ),
                         ),
-                        const Divider(),
-                        ElevatedButton(
-                            onPressed: () {
-                              approvalCubit.approveProposal(widget.proposalRequestData);
-                            },
-                            child: const Text("Approve")),
-                        ElevatedButton(
-                            onPressed: () {
-                              approvalCubit.rejectProposal(widget.proposalRequestData);
-                            },
-                            child: const Text("Reject")),
                       ],
                     ),
-                  )),
-            );
-          },
+                  ),
+                );
+              }
+
+              if (state is ApproveSuccess || state is RejectSuccess) {
+                Future.delayed(
+                  const Duration(seconds: 1),
+                  () => Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MyHomePage()),
+                    (route) => false,
+                  ),
+                );
+              }
+
+              return SafeArea(
+                child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ListTile(
+                            leading: Image.network(widget.proposalRequestData.icons.first),
+                            title: Text(widget.proposalRequestData.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Text(widget.proposalRequestData.url),
+                          ),
+                          const Divider(color: Colors.black, thickness: 0.5),
+                          const SizedBox(height: 16),
+                          Container(
+                            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+                            child: ListView.builder(
+                              itemCount: widget.proposalRequestData.requiredNamespaces.keys.length,
+                              itemBuilder: (context, index) {
+                                Map<String, dynamic> map = widget.proposalRequestData.requiredNamespaces.values.toList()[index] as Map<String, dynamic>;
+
+                                String methods = json.encode(map["methods"]).replaceAll("[", "").replaceAll("]", "").replaceAll('"', "").replaceAll(",", ", ");
+                                String events = json.encode(map["events"]).replaceAll("[", "").replaceAll("]", "").replaceAll('"', "").replaceAll(",", ", ");
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Review " + widget.proposalRequestData.requiredNamespaces.keys.toList()[index] + " permissions",
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Card(
+                                      child: Container(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text("Methods", style: TextStyle(fontWeight: FontWeight.bold)),
+                                            const SizedBox(height: 8),
+                                            Text(methods),
+                                            const SizedBox(height: 16),
+                                            const Text("Events", style: TextStyle(fontWeight: FontWeight.bold)),
+                                            const SizedBox(height: 8),
+                                            Text(events),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          const Divider(),
+                          ElevatedButton(
+                              onPressed: () {
+                                approvalCubit.approveProposal(widget.proposalRequestData);
+                              },
+                              child: const Text("Approve")),
+                          ElevatedButton(
+                              onPressed: () {
+                                approvalCubit.rejectProposal(widget.proposalRequestData);
+                              },
+                              child: const Text("Reject")),
+                        ],
+                      ),
+                    )),
+              );
+            },
+          ),
         ),
       ),
     );

@@ -53,7 +53,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
         case 'onSessionProposal':
           _proposalRequestData = SessionRequestData.fromJson(json.decode(event['params'] ?? {}));
 
-          Navigator.push(
+          Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                   builder: (context) => ProposalSessionScreen(
@@ -116,70 +116,72 @@ class _ConnectScreenState extends State<ConnectScreen> {
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  DottedBorder(
-                    dashPattern: const [4, 3],
-                    padding: const EdgeInsets.symmetric(vertical: 24),
-                    strokeWidth: 1.5,
-                    child: Column(
-                      children: [
-                        const Center(
-                          child: Icon(
-                            Icons.qr_code,
-                            size: 100,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    DottedBorder(
+                      dashPattern: const [4, 3],
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      strokeWidth: 1.5,
+                      child: Column(
+                        children: [
+                          const Center(
+                            child: Icon(
+                              Icons.qr_code,
+                              size: 100,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                            onPressed: () async {
-                              var result = await BarcodeScanner.scan();
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                              onPressed: () async {
+                                var result = await BarcodeScanner.scan();
 
-                              pairingCubit.startPairing(result.rawContent, context);
-                            },
-                            child: Text("Scan QR Code".toUpperCase()))
-                      ],
+                                pairingCubit.startPairing(result.rawContent, context);
+                              },
+                              child: Text("Scan QR Code".toUpperCase()))
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 50),
-                  const Text("or use walletconnect uri"),
-                  const SizedBox(height: 50),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: TextField(
-                            controller: _uriController,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: "wc:...",
+                    const SizedBox(height: 50),
+                    const Text("or use walletconnect uri"),
+                    const SizedBox(height: 50),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: TextField(
+                              controller: _uriController,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: "wc:...",
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      IntrinsicHeight(
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              if (_uriController.text.isNotEmpty) {
-                                pairingCubit.startPairing(_uriController.text, context);
-                              } else {
-                                Get.snackbar(
-                                  "Error",
-                                  "Kolom tidak boleh kosong",
-                                  colorText: Colors.white,
-                                  snackPosition: SnackPosition.TOP,
-                                  backgroundColor: Colors.redAccent,
-                                  margin: const EdgeInsets.all(16),
-                                );
-                              }
-                            },
-                            child: Text("Connect".toUpperCase())),
-                      )
-                    ],
-                  )
-                ],
+                        IntrinsicHeight(
+                          child: ElevatedButton(
+                              onPressed: () async {
+                                if (_uriController.text.isNotEmpty) {
+                                  pairingCubit.startPairing(_uriController.text, context);
+                                } else {
+                                  Get.snackbar(
+                                    "Error",
+                                    "Kolom tidak boleh kosong",
+                                    colorText: Colors.white,
+                                    snackPosition: SnackPosition.TOP,
+                                    backgroundColor: Colors.redAccent,
+                                    margin: const EdgeInsets.all(16),
+                                  );
+                                }
+                              },
+                              child: Text("Connect".toUpperCase())),
+                        )
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
           );

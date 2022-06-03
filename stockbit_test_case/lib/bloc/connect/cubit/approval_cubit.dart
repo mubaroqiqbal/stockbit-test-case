@@ -36,6 +36,15 @@ class ApprovalCubit extends Cubit<ApprovalState> {
       }
     });
 
+    Get.snackbar(
+      "Success",
+      "Approving session success",
+      colorText: Colors.white,
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: Colors.lightGreen,
+      margin: const EdgeInsets.all(16),
+    );
+
     emit(const ApproveSuccess());
   }
 
